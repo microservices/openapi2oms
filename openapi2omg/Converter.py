@@ -73,7 +73,20 @@ class Converter:
             'email': self.op_spec.get('contact', {}).get('email', '')
         }
 
-    def _to_action(self, path: str, method: str, content: dict) -> dict:
+    def _get_argument_type(self, param_spec: dict) -> str:
+        schema = param_spec.get('schema')
+        content = param_spec.get('content')
+
+        # No need to validate for the presence of both, schema and content,
+        # since we know that the spec is valid already.
+        if schema:
+            return OpenAPIActionUtil.to_omg_type(schema['type'])
+        else:  # content.
+            raise ConverterError(
+                'Using the "content" key to specify parameter serialising '
+                'strategy is not supported at this time.')
+
+    def _to_action(self, path: str, method: str, path_spec: dict) -> dict:
         base_url = self.http_base_url
 
         servers_for_this_path = self.op_spec['paths'][path].get('servers', {})
@@ -92,16 +105,85 @@ class Converter:
                 f'The URL for the path "{path}" is invalid. '
                 f'Derived value is "{url}" (must have http(s) as the scheme)')
 
+        arguments = {}
+
         action_def = {
-            'help': '',  # TODO:
+            'help': path_spec.get('summary'),
             'http': {
                 'port': 0,
                 'method': method,
                 'path': url  # TODO: do we want to introduce something like absolute_url in the OMG for this?
-            }
+            },
+            'arguments': arguments
         }
-        
+
+        self._insert_parameters(arguments, path_spec)
+        self._insert_request_body(action_def, arguments, path_spec)
+
         return action_def
+
+    def _insert_arguments(self, arguments, content_spec,
+                          include_location=True):
+        for prop_name, prop_spec in content_spec['properties'].items():
+            arg_type = OpenAPIActionUtil.to_omg_type(prop_spec['type'])
+
+            arg = {
+                'required': prop_spec.get('required', False),
+                'type': arg_type,
+                'in': 'requestBody'
+            }
+
+            if prop_spec.get('description'):
+                arg['help'] = prop_spec.get('description')
+            
+            if not include_location:
+                del arg['in']
+
+            if arg_type == 'object':
+                sub_props = {}
+                self._insert_arguments(sub_props, prop_spec,
+                                       include_location=False)
+                arg['properties'] = sub_props
+            arguments[prop_name] = arg
+
+    def _insert_request_body(self, action, arguments, path_spec):
+        request_body = path_spec.get('requestBody')
+        if not request_body:
+            return
+
+        content = request_body['content']
+        possible_content_types = content.keys()
+
+        chosen_content_type = list(possible_content_types)[0]
+
+        if len(possible_content_types) > 1 and \
+                'application/json' in possible_content_types:
+            chosen_content_type = 'application/json'
+
+        action['http']['contentType'] = chosen_content_type
+
+        content_spec = content[chosen_content_type]['schema']
+        if content_spec['type'] == 'object':
+            self._insert_arguments(arguments, content_spec)
+        else:
+            arg = {
+                'help': content_spec.get('description'),
+                'required': content_spec.get('required', False),
+                'type': OpenAPIActionUtil.to_omg_type(content_spec['type']),
+                'in': 'requestBody'
+            }
+            arguments[
+                'root'] = arg  # TODO: umm, what to do here? There is no name as
+
+    def _insert_parameters(self, arguments, path_spec):
+        for param in path_spec.get('parameters', []):
+            arg = {
+                'help': param.get('description'),
+                'required': param['required'],
+                'type': self._get_argument_type(param),
+                'in': OpenAPIActionUtil.to_omg_argument_location(param['in'])
+            }
+            arguments[param['name']] = arg
 
     def consume_paths(self):
         actions = {}
