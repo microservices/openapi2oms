@@ -24,6 +24,9 @@ class Converter:
 
     omg: dict = {'omg': 1, 'source': 'openapi'}
 
+    order_consume_http_successful_responses = ['200', '201', '202', '2XX',
+                                               '204', 'default']
+
     http_base_url: str = ''
 
     def __init__(self, contents: dict, properties: dict):
@@ -119,8 +122,61 @@ class Converter:
 
         self._insert_parameters(arguments, path_spec)
         self._insert_request_body(action_def, arguments, path_spec)
+        self._insert_output(action_def, path_spec)
 
         return action_def
+
+    def _insert_output(self, action_def: dict, path_spec: dict):
+        all_responses = path_spec['responses']
+        # TODO: create an issue in the OMG to support multiple responses
+        # The OMG only supports successful responses right now,
+        # so take any 2xx result.
+
+        chosen_response = None
+
+        for code in self.order_consume_http_successful_responses:
+            chosen_response = all_responses.get(code)
+            if chosen_response:
+                break
+
+        if chosen_response is None:
+            # OpenAPI mandates at least one response code to be documented,
+            # but it doesn't enforce that a successful response must be
+            # documented. Default to an empty 2xx.
+            # Only mock description, since it's a hard requirement for OpenAPI.
+            chosen_response = {'description': 'Auto generated 2xx.'}
+
+        description = chosen_response['description']
+        content: dict = chosen_response.get('content', {})
+
+        if not content or len(content) == 0:
+            action_def['output'] = {'type': None, 'help': description}
+            return
+
+        content_type = self._get_preferred_content_type(content.keys())
+        output_type = content[content_type]['schema']['type']
+
+        output_type = OpenAPIActionUtil.to_omg_type(output_type)
+
+        if content_type == 'text/plain':
+            output_type = 'string'
+
+        props = {}
+
+        action_def['output'] = {
+            'type': output_type,
+            'contentType': content_type,
+            'properties': props
+        }
+
+        if output_type == 'list':
+            # TODO: OMG doesn't support describing array schema yet.
+            return
+
+        schema = content[content_type].get('schema', {})
+        if len(schema.get('properties', {})) > 0:
+            self._insert_arguments(props, schema,
+                                   include_location=False)
 
     def _insert_arguments(self, arguments, content_spec,
                           include_location=True):
@@ -139,6 +195,7 @@ class Converter:
             if not include_location:
                 del arg['in']
 
+            # TODO: add support for describing array contents.
             if arg_type == 'object':
                 sub_props = {}
                 self._insert_arguments(sub_props, prop_spec,
@@ -146,19 +203,22 @@ class Converter:
                 arg['properties'] = sub_props
             arguments[prop_name] = arg
 
+    def _get_preferred_content_type(self, possible_content_types) -> str:
+        chosen_content_type = list(possible_content_types)[0]
+
+        if len(possible_content_types) > 1 and \
+                'application/json' in possible_content_types:
+            chosen_content_type = 'application/json'
+
+        return chosen_content_type
+
     def _insert_request_body(self, action, arguments, path_spec):
         request_body = path_spec.get('requestBody')
         if not request_body:
             return
 
         content = request_body['content']
-        possible_content_types = content.keys()
-
-        chosen_content_type = list(possible_content_types)[0]
-
-        if len(possible_content_types) > 1 and \
-                'application/json' in possible_content_types:
-            chosen_content_type = 'application/json'
+        chosen_content_type = self._get_preferred_content_type(content.keys())
 
         action['http']['contentType'] = chosen_content_type
 
