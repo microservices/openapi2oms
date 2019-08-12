@@ -283,15 +283,21 @@ class Converter:
                     'are not supported at this time.')
 
     def consume_components(self):
+        # No need to consume components, since these contain schemas,
+        # and the references to these schemas are automatically traversed by
+        # prance's ResolvingParser.
         pass
 
     def consume_security(self):
+        # TODO: need to impl + add to the OMG
         pass
 
     def consume_tags(self):
+        # The OMG has no placeholder for tags, so we do not consume them.
         pass
 
     def consume_external_docs(self):
+        # No need to consume these since the OMG doesn't have/need this.
         pass
 
     def convert(self) -> dict:
