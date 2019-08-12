@@ -251,6 +251,9 @@ class Converter:
 
         for path in self.op_spec['paths']:
             for method, content in self.op_spec['paths'][path].items():
+                if method not in ['get', 'head', 'post', 'put', 'delete',
+                                  'patch']:
+                    continue
                 action_name = OpenAPIActionUtil.generate_action_name(
                     path, method, content)
                 actions[action_name] = self._to_action(path, method, content)
@@ -308,7 +311,7 @@ class Converter:
 
 
 if __name__ == '__main__':
-    with io.open('samples/petstore.json') as f:
+    with io.open('samples/algorithmia.json') as f:
         converter = Converter(json.load(f), properties={
             Properties.SERVER_INDEX: 0
         })
