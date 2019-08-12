@@ -7,3 +7,9 @@
    Furthermore, since multiple content types are not supported, `application/json`
    will be used if available. If `application/json` is not available, then an
    appropriate content type will be chosen arbitrarily
+   
+   
+## todos 
+related:
+1. https://github.com/microservices/microservice.guide/issues/50
+2. https://github.com/microservices/microservice.guide/pull/96
