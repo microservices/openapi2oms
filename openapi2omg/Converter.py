@@ -113,9 +113,8 @@ class Converter:
         action_def = {
             'help': path_spec.get('summary'),
             'http': {
-                'port': 0,
                 'method': method,
-                'path': url  # TODO: do we want to introduce something like absolute_url in the OMG for this?
+                'url': url
             },
             'arguments': arguments
         }
@@ -128,7 +127,6 @@ class Converter:
 
     def _insert_output(self, action_def: dict, path_spec: dict):
         all_responses = path_spec['responses']
-        # TODO: create an issue in the OMG to support multiple responses
         # The OMG only supports successful responses right now,
         # so take any 2xx result.
 

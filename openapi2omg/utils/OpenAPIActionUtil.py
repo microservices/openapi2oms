@@ -65,7 +65,7 @@ class OpenAPIActionUtil:
     _locations = {
         'query': 'query',
         'path': 'path',
-        'header': 'header'  # TODO: add support for this in the OMG spec
+        'header': 'header'
     }
 
     @staticmethod
