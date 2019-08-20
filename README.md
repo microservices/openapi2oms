@@ -4,6 +4,11 @@ equivalent. Not all features are supported, and some assumptions have
 been made. Please read the caveats section to understand these
 assumptions. 
 
+## Storyscript
+```coffee
+result = openapi2omg convert spec: openApiSpec properties: {"serverIndex": 0}
+```  
+
 ## Caveats
 ### Assumptions
 1. If there are multiple content types available for a given path, the content type

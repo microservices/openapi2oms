@@ -1,0 +1,45 @@
+omg: 1
+info:
+  version: 1.0.0
+  title: openapi2omg
+  description: |
+    This tool aims to convert an OpenAPI 3 spec to its corresponding OMG
+    equivalent. Not all features are supported, and some assumptions have
+    been made.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+lifecycle:
+  startup:
+    command: ["python", "-m", "openapi2omg.Service"]
+actions:
+  convert:
+    help: Convert an OpenAPI document to OMG document
+    http:
+      path: /convert
+      port: 9000
+      method: post
+      contentType: application/json
+    arguments:
+      spec:
+        help: The OpenAPI spec, as a map
+        type: map
+        in: requestBody
+        required: true
+      properties:
+        help: Properties to be used for conversion
+        type: object
+        properties:
+          serverIndex:
+            help: |
+              If multiple servers are present in the OpenAPI spec,
+              this must be specified. The server selected for the OMG
+              spec will be based on this index.
+            type: int
+    output:
+      type: object
+      contentType: application/json
+      properties:
+        spec:
+          help: The converted OpenAPI document
+          type: map

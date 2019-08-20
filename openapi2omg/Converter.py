@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
-import io
 import json
 import typing
-import yaml
 
 from prance import ResolvingParser
 from urllib.parse import urlparse
@@ -310,15 +308,3 @@ class Converter:
                 phase.function()
 
         return self.omg
-
-    def print(self):
-        # out = yaml.dump(self.convert(), allow_unicode=True)
-        print(json.dumps(self.convert(), indent=True))
-
-
-if __name__ == '__main__':
-    with io.open('samples/petstore.json') as f:
-        converter = Converter(json.load(f), properties={
-            Properties.SERVER_INDEX: 0
-        })
-        converter.print()
