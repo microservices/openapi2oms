@@ -17,7 +17,7 @@ class Service:
             c = Converter(contents=spec, properties=props)
             return self.end({'spec': c.convert()})
         except BaseException as e:
-            return self.end({'error': str(e)}, 400)
+            return self.end({'error': str(e), 'spec': None})
 
     @staticmethod
     def end(res, response_code=200):
