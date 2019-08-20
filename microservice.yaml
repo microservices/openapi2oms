@@ -28,14 +28,16 @@ actions:
         required: true
       properties:
         help: Properties to be used for conversion
-        type: object
-        properties:
-          serverIndex:
-            help: |
-              If multiple servers are present in the OpenAPI spec,
-              this must be specified. The server selected for the OMG
-              spec will be based on this index.
-            type: int
+        type: map
+        in: requestBody
+#        type: object
+#        properties:
+#          serverIndex:
+#            help: |
+#              If multiple servers are present in the OpenAPI spec,
+#              this must be specified. The server selected for the OMG
+#              spec will be based on this index.
+#            type: int
     output:
       type: object
       contentType: application/json
