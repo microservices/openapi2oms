@@ -1,9 +1,9 @@
-omg: 1
+oms: 1
 info:
   version: 1.0.0
-  title: openapi2omg
+  title: openapi2oms
   description: |
-    This tool aims to convert an OpenAPI 3 spec to its corresponding OMG
+    This tool aims to convert an OpenAPI 3 spec to its corresponding OMS
     equivalent. Not all features are supported, and some assumptions have
     been made.
   license:
@@ -11,10 +11,10 @@ info:
     url: https://opensource.org/licenses/MIT
 lifecycle:
   startup:
-    command: ["python", "-m", "openapi2omg.Service"]
+    command: ["python", "-m", "openapi2oms.Service"]
 actions:
   convert:
-    help: Convert an OpenAPI document to OMG document
+    help: Convert an OpenAPI document to OMS document
     http:
       path: /convert
       port: 9000
@@ -35,7 +35,7 @@ actions:
 #          serverIndex:
 #            help: |
 #              If multiple servers are present in the OpenAPI spec,
-#              this must be specified. The server selected for the OMG
+#              this must be specified. The server selected for the OMS
 #              spec will be based on this index.
 #            type: int
     output:

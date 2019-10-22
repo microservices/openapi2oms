@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-name = 'openapi2omg'
+name = 'openapi2oms'

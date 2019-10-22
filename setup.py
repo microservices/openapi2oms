@@ -5,14 +5,14 @@ with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='openapi2omg',
+    name='openapi2oms',
     version='0.1.0',
     author='Storyscript',
     author_email='support@storyscript.io',
-    description='A tool to convert an OpenAPI spec to an OMG spec',
+    description='A tool to convert an OpenAPI spec to an OMS spec',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/microservices/openapi2omg',
+    url='https://github.com/microservices/openapi2oms',
     packages=setuptools.find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',

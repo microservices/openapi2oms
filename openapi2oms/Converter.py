@@ -6,9 +6,9 @@ import typing
 from prance import ResolvingParser
 from urllib.parse import urlparse
 
-from openapi2omg import Properties
-from openapi2omg.exceptions.ConverterError import ConverterError
-from openapi2omg.utils.OpenAPIActionUtil import OpenAPIActionUtil
+from openapi2oms import Properties
+from openapi2oms.exceptions.ConverterError import ConverterError
+from openapi2oms.utils.OpenAPIActionUtil import OpenAPIActionUtil
 
 MappingPhase = namedtuple('MappingPhase', ['key', 'required', 'function'])
 
@@ -21,7 +21,7 @@ class Converter:
 
     phases: typing.List[MappingPhase] = None
 
-    omg: dict = {'omg': 1, 'source': 'openapi', 'hostedExternally': True}
+    oms: dict = {'oms': 1, 'source': 'openapi', 'hostedExternally': True}
 
     order_consume_http_successful_responses = ['200', '201', '202', '2XX',
                                                '204', 'default']
@@ -55,11 +55,11 @@ class Converter:
         if self.op_spec['openapi'][0] != '3':
             raise ConverterError('Only OpenAPI version 3 is supported')
 
-        self.omg['fromOpenAPIVersion'] = self.op_spec['openapi']
+        self.oms['fromOpenAPIVersion'] = self.op_spec['openapi']
 
     def consume_info(self):
         op_info = self.op_spec['info']
-        self.omg['info'] = {
+        self.oms['info'] = {
             'version': op_info['version'],
             'title': op_info['title'],
             'description': op_info.get('description', ''),
@@ -69,7 +69,7 @@ class Converter:
             }
         }
 
-        self.omg['contact'] = {
+        self.oms['contact'] = {
             'name': self.op_spec.get('contact', {}).get('name', ''),
             'url': self.op_spec.get('contact', {}).get('url', ''),
             'email': self.op_spec.get('contact', {}).get('email', '')
@@ -82,7 +82,7 @@ class Converter:
         # No need to validate for the presence of both, schema and content,
         # since we know that the spec is valid already.
         if schema:
-            return OpenAPIActionUtil.to_omg_type(schema['type'])
+            return OpenAPIActionUtil.to_oms_type(schema['type'])
         else:  # content.
             raise ConverterError(
                 'Using the "content" key to specify parameter serialising '
@@ -126,7 +126,7 @@ class Converter:
 
     def _insert_output(self, action_def: dict, path_spec: dict):
         all_responses = path_spec['responses']
-        # The OMG only supports successful responses right now,
+        # The OMS only supports successful responses right now,
         # so take any 2xx result.
 
         chosen_response = None
@@ -153,7 +153,7 @@ class Converter:
         content_type = self._get_preferred_content_type(content.keys())
         output_type = content[content_type]['schema']['type']
 
-        output_type = OpenAPIActionUtil.to_omg_type(output_type)
+        output_type = OpenAPIActionUtil.to_oms_type(output_type)
 
         if content_type == 'text/plain':
             output_type = 'string'
@@ -167,7 +167,7 @@ class Converter:
         }
 
         if output_type == 'list':
-            # TODO: OMG doesn't support describing array schema yet.
+            # TODO: OMS doesn't support describing array schema yet.
             return
 
         schema = content[content_type].get('schema', {})
@@ -178,7 +178,7 @@ class Converter:
     def _insert_arguments(self, arguments, content_spec,
                           include_location=True):
         for prop_name, prop_spec in content_spec['properties'].items():
-            arg_type = OpenAPIActionUtil.to_omg_type(prop_spec['type'])
+            arg_type = OpenAPIActionUtil.to_oms_type(prop_spec['type'])
 
             arg = {
                 'required': prop_spec.get('required', False),
@@ -226,7 +226,7 @@ class Converter:
             arg = {
                 'help': content_spec.get('description'),
                 'required': content_spec.get('required', False),
-                'type': OpenAPIActionUtil.to_omg_type(content_spec['type']),
+                'type': OpenAPIActionUtil.to_oms_type(content_spec['type']),
                 'in': 'requestBody'
             }
             arguments[
@@ -238,13 +238,13 @@ class Converter:
                 'help': param.get('description'),
                 'required': param['required'],
                 'type': self._get_argument_type(param),
-                'in': OpenAPIActionUtil.to_omg_argument_location(param['in'])
+                'in': OpenAPIActionUtil.to_oms_argument_location(param['in'])
             }
             arguments[param['name']] = arg
 
     def consume_paths(self):
         actions = {}
-        self.omg['actions'] = actions
+        self.oms['actions'] = actions
 
         for path in self.op_spec['paths']:
             for method, content in self.op_spec['paths'][path].items():
@@ -286,15 +286,15 @@ class Converter:
         pass
 
     def consume_security(self):
-        # TODO: need to impl + add to the OMG
+        # TODO: need to impl + add to the OMS
         pass
 
     def consume_tags(self):
-        # The OMG has no placeholder for tags, so we do not consume them.
+        # The OMS has no placeholder for tags, so we do not consume them.
         pass
 
     def consume_external_docs(self):
-        # No need to consume these since the OMG doesn't have/need this.
+        # No need to consume these since the OMS doesn't have/need this.
         pass
 
     def convert(self) -> dict:
@@ -307,4 +307,4 @@ class Converter:
             if part is not None:
                 phase.function()
 
-        return self.omg
+        return self.oms
