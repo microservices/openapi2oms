@@ -3,7 +3,7 @@ import json
 
 from flask import Flask, make_response, request
 
-from openapi2omg.Converter import Converter
+from openapi2oms.Converter import Converter
 
 
 class Service:

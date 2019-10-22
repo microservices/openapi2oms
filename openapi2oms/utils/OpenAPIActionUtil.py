@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 
-from openapi2omg.exceptions.MappingError import MappingError
+from openapi2oms.exceptions.MappingError import MappingError
 
 
 class OpenAPIActionUtil:
@@ -53,14 +53,14 @@ class OpenAPIActionUtil:
     }
 
     @staticmethod
-    def to_omg_type(openapi_type: str):
-        omg_type = OpenAPIActionUtil._types.get(openapi_type)
+    def to_oms_type(openapi_type: str):
+        oms_type = OpenAPIActionUtil._types.get(openapi_type)
 
-        if omg_type is None:
+        if oms_type is None:
             raise MappingError(f'The OpenAPI type {openapi_type} '
-                               f'could not be mapped to an OMG type.')
+                               f'could not be mapped to an OMS type.')
 
-        return omg_type
+        return oms_type
 
     _locations = {
         'query': 'query',
@@ -69,12 +69,12 @@ class OpenAPIActionUtil:
     }
 
     @staticmethod
-    def to_omg_argument_location(openapi_location: str):
-        omg_location = OpenAPIActionUtil._locations.get(openapi_location)
+    def to_oms_argument_location(openapi_location: str):
+        oms_location = OpenAPIActionUtil._locations.get(openapi_location)
 
-        if omg_location is None:
+        if oms_location is None:
             raise MappingError(
                 f'The OpenAPI parameter location {openapi_location} '
-                f'could not be mapped to an OMG parameter location.')
+                f'could not be mapped to an OMS parameter location.')
 
-        return omg_location
+        return oms_location
