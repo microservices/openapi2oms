@@ -23,8 +23,8 @@ result = openapi2oms convert spec: openApiSpec properties: {"serverIndex": 0}
    
 ### todos 
 related:
-1. https://github.com/microservices/microservice.guide/issues/50
-2. https://github.com/microservices/microservice.guide/pull/96
+1. [ ] https://github.com/microservices/openmicroservices.org/issues/50
+2. [x] https://github.com/microservices/openmicroservices.org/pull/96
 
 ## License
 MIT License
